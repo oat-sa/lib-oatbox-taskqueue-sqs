@@ -1,0 +1,38 @@
+{
+    "name" : "oat-sa/lib-oatbox-taskqueue-sqs",
+    "description" : "OAT Task Queue - AWS SQS implementation",
+    "type" : "library",
+    "authors" : [
+        {
+            "name" : "Open Assessment Technologies S.A.",
+            "homepage" : "http://www.taotesting.com"
+        },
+        {
+            "role": "Developer",
+            "name": "Gyula Szucs"
+        }
+    ],
+    "support": {
+        "forum": "http://forum.taotesting.com",
+        "issues": "http://forge.taotesting.com"
+    },
+    "keywords" : [
+        "tao",
+        "oat",
+        "queue",
+        "computer-based-assessment",
+        "sqs"
+    ],
+    "homepage" : "http://www.taotesting.com",
+    "license" : "GPL-2.0",
+    "require" : {
+        "php" : ">=5.6.30",
+        "aws/aws-sdk-php": "^3.35"
+    },
+    "minimum-stability" : "dev",
+    "autoload" : {
+        "psr-4" : {
+            "oat\\TaskQueue\\" : "src/"
+        }
+    }
+}
