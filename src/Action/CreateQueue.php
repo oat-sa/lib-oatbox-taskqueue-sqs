@@ -2,20 +2,27 @@
 
 namespace oat\TaskSqsQueue\Action;
 
+use Aws\Exception\AwsException;
 use oat\oatbox\extension\InstallAction;
+use oat\oatbox\task\Queue;
 use oat\TaskSqsQueue\Persistence\SqsPersistence;
 use oat\TaskSqsQueue\SqsQueue;
 
+/**
+ * Creates the given SQS Queue. It can be run only after the SqsQueue service has been initialized.
+ *
+ * Queue name can be passed as a CLI parameter otherwise it will be fetched from the SqsQueue service.
+ *
+ * @author <gyula@taotesting.com>
+ */
 class CreateQueue extends InstallAction
 {
     public function __invoke($params)
     {
-        var_dump($params);die;
-
         $queue = $this->getServiceManager()->get(Queue::SERVICE_ID);
 
         if (!$queue instanceof SqsQueue) {
-            return \common_report_Report::createFailure('Queue needs to be an SqsQueue instance.');
+            return \common_report_Report::createFailure('Queue service needs to be an SqsQueue instance.');
         }
 
         $queueName = array_shift($params) ?: $queue->getOption(SqsQueue::OPTION_QUEUE_NAME);
@@ -28,19 +35,23 @@ class CreateQueue extends InstallAction
         $persistance = $queue->getPersistence();
 
         try {
+            // Note: we are creating a Standard Queue for the time being. More development needed to customize this for creating FIFO Queue.
+            /** @see http://docs.aws.amazon.com/aws-sdk-php/v3/api/api-sqs-2012-11-05.html#createqueue */
             $result = $persistance->getSqsClient()->createQueue([
                 'QueueName' => $queueName,
                 'Attributes' => [
-                    'DelaySeconds' => 5,
-                    'MaximumMessageSize' => 4096, // 4 KB
+                    'DelaySeconds' => 0,
+                    'VisibilityTimeout' => 120
                 ]
             ]);
 
-            var_dump($result);
-
-            return \common_report_Report::createSuccess('Queue "'. $queueName .'" has been created.');
+            if ($result->hasKey('QueueUrl')) {
+                return \common_report_Report::createSuccess('Queue "'. $result->get('QueueUrl') .'" has been successfully created.');
+            } else {
+                return \common_report_Report::createFailure('No queue created.');
+            }
         } catch (AwsException $e) {
-            return \common_report_Report::createFailure($e->getMessage());
+            return \common_report_Report::createFailure($e->getAwsErrorMessage());
         }
     }
 }
