@@ -32,7 +32,7 @@
     "minimum-stability" : "dev",
     "autoload" : {
         "psr-4" : {
-            "oat\\TaskQueue\\" : "src/"
+            "oat\\TaskSqsQueue\\" : "src/"
         }
     }
 }
