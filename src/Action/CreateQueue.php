@@ -41,12 +41,16 @@ class CreateQueue extends InstallAction
                 'QueueName' => $queueName,
                 'Attributes' => [
                     'DelaySeconds' => 0,
-                    'VisibilityTimeout' => 120
+                    'VisibilityTimeout' => 600
                 ]
             ]);
 
             if ($result->hasKey('QueueUrl')) {
-                return \common_report_Report::createSuccess('Queue "'. $result->get('QueueUrl') .'" has been successfully created.');
+                // saving the full AWS queue url into settings for later use
+                $queue->setOption(SqsQueue::OPTION_QUEUE_URL, $result->get('QueueUrl'));
+                $this->getServiceManager()->register(Queue::SERVICE_ID, $queue);
+
+                return \common_report_Report::createSuccess('Queue has been successfully created and queue url "'. $result->get('QueueUrl') .'" has been saved.');
             } else {
                 return \common_report_Report::createFailure('No queue created.');
             }
